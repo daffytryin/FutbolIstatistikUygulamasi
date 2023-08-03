@@ -1,4 +1,4 @@
---1. Yukarıdaki tabloların create scriptlerini oluşturunuz.
+-1. Yukarıdaki tabloların create scriptlerini oluşturunuz.
 
 CREATE TABLE Country(
 id int,
@@ -67,5 +67,55 @@ SELECT * FROM lig WHERE lig.id_country = 1;
 
 --4. İsmi “Türkiye” olan ülkenin takımların listesini getiren scripti yazınız
 
-SELECT * FROM takim
-WHERE takim.id_league = 1;
+SELECT * FROM takim WHERE takim.id_league = 1;
+
+--5. İsmi “Türkiye” olan en üst seviyeli ligdeki puan tablosunu getiren scripti yazınız.
+
+SELECT Takim.adı AS TakimAdı, Takim.puan AS Puan FROM Takim
+INNER JOIN Lig ON Takim.id_league = Lig.id WHERE Lig.id_country = 1 AND Takim.seviye = 1
+ORDER BY Takim.puan DESC;
+
+--6. Türkiye liglerindeki puan ortalamalarını gösteren scrpiti yazınız.
+
+SELECT AVG(puan) AS PuanOrtalaması FROM Takim WHERE id_league IN (SELECT id FROM Lig WHERE id_country = 1);
+
+--7. Bir ligin Gol kralını getiren scprit yazınız. (oyuncu adı, soyadı, takım adı, nereli olduğu)
+
+SELECT Oyuncu.adı, Oyuncu.soyadı, Takim.adı, Country.name AS Nereli, Oyuncu.attigi_gol FROM Oyuncu
+INNER JOIN Takim ON Oyuncu.id_team = Takim.id
+INNER JOIN Country ON Oyuncu.id_country = Country.id
+ORDER BY Oyuncu.attigi_gol DESC
+LIMIT 1;
+
+--8. Tüm liglerde attığı gol yediği golden daha küçük olan takımları getiren scripti yazınız.
+
+--Bunun için yedigi_gol olarak bir column aşağıdaki gibi eklendi;
+ALTER TABLE Oyuncu ADD yedigi_gol INT;
+
+--Ardından tablodaki kolona veriler UPDATE ile işlendi
+
+UPDATE Oyuncu
+SET yedigi_gol = 10 WHERE adı = 'Arda';
+
+UPDATE Oyuncu
+SET yedigi_gol = 12 WHERE adı = 'Lionel';
+
+UPDATE Oyuncu
+SET yedigi_gol = 10 WHERE adı = 'Cristiano';
+
+UPDATE Oyuncu
+SET yedigi_gol = 8 WHERE adı = 'Robin';
+
+UPDATE Oyuncu
+SET yedigi_gol = 6 WHERE adı = 'Nani';
+
+-- Ardından sorgulama yapıldı
+
+SELECT Oyuncu.adı AS OyuncuAdı, oyuncu.attigi_gol AS AttığıGol, oyuncu.yedigi_gol AS YediğiGol FROM Oyuncu
+INNER JOIN Takim ON Oyuncu.id_team = Takim.id WHERE oyuncu.attigi_gol < Oyuncu.yedigi_gol;
+
+--9. Bir takımın oyuncularının toplam gol sayısını ve takımın gol sayısını yan yana getiren bir
+--scprit yazınız. (kontrol sorgusu gibi, birisi takım verisi, diğeri oyuncuların toplamı olacak)
+
+SELECT Takim.adı AS TakımAdı, Takim.attigi_gol AS TakımGol, SUM(Oyuncu.attigi_gol) AS OyuncuToplamGol FROM Takim
+LEFT JOIN Oyuncu ON Takim.id = Oyuncu.id_team GROUP BY Takim.adı, Takim.attigi_gol;
