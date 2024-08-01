@@ -1,4 +1,4 @@
-# gt-odev-3
+# Futbol İstatistik Uygulamasi
 
 Futbol İstatistik Uygulaması
 Country: id, name
